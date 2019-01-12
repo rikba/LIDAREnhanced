@@ -62,13 +62,6 @@ class LidarController {
       Start the I2C line with the correct frequency
     *******************************************************************************/
     void begin(bool fasti2c = false) {
-      for(uint8_t i=0; i<MAX_LIDARS; i++){
-        lidars[i]->last_distance = 0;
-        lidars[i]->distance = 0;
-        lidars[i]->velocity = 0;
-        lidars[i]->strength = 0;
-      }
-
       Wire.begin();
       if (fasti2c) {
 #if ARDUINO >= 157
@@ -212,16 +205,16 @@ class LidarController {
       Velocity scaling :
         - Scale the velocity measures
 
-        CAUTION, different than the Scale function from LidarLite (not 1,2,3,4 but 
+        CAUTION, different than the Scale function from LidarLite (not 1,2,3,4 but
         the actual period measurment, Note the x2 between 100 and 0xC8 (200))
 
-        Measurement  | Velocity         | Register         
-        Period (ms)  | Scaling (m/sec)  | 045 Load Value   
-        :----------- | :--------------- | :--------------- 
-        100          | 0.10 m/s         | 0xC8 (default)   
-        40           | 0.25 m/s         | 0x50             
-        20           | 0.50 m/s         | 0x28             
-        10           | 1.00 m/s         | 0x14             
+        Measurement  | Velocity         | Register
+        Period (ms)  | Scaling (m/sec)  | 045 Load Value
+        :----------- | :--------------- | :---------------
+        100          | 0.10 m/s         | 0xC8 (default)
+        40           | 0.25 m/s         | 0x50
+        20           | 0.50 m/s         | 0x28
+        10           | 1.00 m/s         | 0x14
     *******************************************************************************/
     void scale(uint8_t Lidar, uint8_t velocityScaling){
         I2C.write(lidars[Lidar]->address, SCALE_VELOCITY_REGISTER, velocityScaling);
@@ -231,7 +224,7 @@ class LidarController {
       Velocity  NOT WORKING (guess, since there is no wait) :
         - Read the velocity
 
-        This has to be worked on, this is the original implementation without the 
+        This has to be worked on, this is the original implementation without the
           blocking architecture
     *******************************************************************************/
     int velocity(uint8_t Lidar, int * data) {
@@ -413,7 +406,7 @@ class LidarController {
               if((abs(data - lidars[i]->distance) > 100) | (data < 4 or data > 1000)){
                 shouldIncrementNack(i, 1);
               }
-              
+
               lidars[i]->last_distance = lidars[i]->distance;
               lidars[i]->distance = data;
               // Write data anyway but the information is send via nacks = 15
